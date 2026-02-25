@@ -1,4 +1,4 @@
-FROM python:3.13-slim-bookworm AS builder
+FROM python:3.14-slim-bookworm AS builder
 ARG GITHUB_API_TOKEN
 
 RUN apt-get update && apt-get install -y gcc build-essential && rm -rf /var/lib/apt/lists/*
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/app/.cache/uv \
 RUN mkdir -p /app/.cache/uv && chown -R 64357:64357 /app
 
 # prod image
-FROM python:3.13-slim-bookworm AS prod
+FROM python:3.14-slim-bookworm AS prod
 COPY --from=builder /root/.local /root/.local
 COPY --from=builder /app /app
 ENV PATH="/root/.local/bin:$PATH"
