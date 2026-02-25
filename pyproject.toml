@@ -1,5 +1,5 @@
 [project]
-name = "{{template_agent}}"
+name = "tala_agent"
 version = "0.0.1"
 description = "Add your description here"
 readme = "README.md"

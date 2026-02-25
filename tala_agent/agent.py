@@ -1,7 +1,7 @@
 from contextual_agents_sdk.hydrator import Hydrator
 
-from {{template_agent}}.config import agent_config
-from {{template_agent}}.tools import greater_tool
+from tala_agent.config import agent_config
+from tala_agent.tools import greater_tool
 
 
 def get_analytics(checkpointer=None):

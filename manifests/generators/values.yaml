@@ -1,6 +1,6 @@
 apiVersion: qlik.com/v1
 kind: HelmValues
 metadata:
-  name: {{template-agent}}
+  name: tala-agent
 releaseNamespace: $(NAMESPACE)
 values: {}

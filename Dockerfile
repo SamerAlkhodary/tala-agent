@@ -16,7 +16,7 @@ ENV UV_CACHE_DIR=/app/.cache/uv
 
 RUN mkdir -p /app/.cache/uv
 
-COPY {{template_agent}} /app/{{template_agent}}
+COPY tala_agent /app/tala_agent
 COPY uv.lock /app
 COPY pyproject.toml /app
 COPY swarm_configs/ /app/swarm_configs
@@ -44,7 +44,7 @@ ENV BUILD_INFO_CREATED=$CREATED
 ENV BUILD_INFO_REVISION=$REVISION
 
 LABEL org.opencontainers.image.created=$CREATED
-LABEL org.opencontainers.image.source="https://github.com/qlik-trial/{{template-agent}}"
+LABEL org.opencontainers.image.source="https://github.com/qlik-trial/tala-agent"
 LABEL org.opencontainers.image.version=$VERSION
 LABEL org.opencontainers.image.revision=$REVISION
 
@@ -55,4 +55,4 @@ RUN chown -R 64357:64357 /app
 USER 64357:64357
 
 WORKDIR /app
-CMD ["uv", "run", "python", "-m", "{{template_agent}}"]
+CMD ["uv", "run", "python", "-m", "tala_agent"]

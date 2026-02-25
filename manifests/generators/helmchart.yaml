@@ -1,10 +1,10 @@
 apiVersion: qlik.com/v1
 kind: HelmChart
 metadata:
-  name: {{template-agent}}
+  name: tala-agent
 chartHome: ../chart
-chartName: {{template-agent}}
-releaseName: {{template-agent}}
+chartName: tala-agent
+releaseName: tala-agent
 releaseNamespace: $(NAMESPACE)
 newChartVersion: $(VERSION)
 values:

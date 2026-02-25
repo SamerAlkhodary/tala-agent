@@ -1,7 +1,7 @@
 apiVersion: qlik.com/v1
 kind: SearchReplace
 metadata:
-  name: {{template-agent}}
+  name: tala-agent
 target:
   kind: HelmChart
 path: /

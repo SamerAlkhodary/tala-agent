@@ -2,12 +2,12 @@ import json
 from unittest.mock import patch
 
 import pytest
-from {{template_agent}}.tools import greater_tool
+from tala_agent.tools import greater_tool
 
 
 @pytest.fixture
 def mock_dependencies():
-    with patch("{{template_agent}}.tools.dummy_tools.number_comparing_tool.logger") as mock_logger:
+    with patch("tala_agent.tools.dummy_tools.number_comparing_tool.logger") as mock_logger:
         yield {
             "logger": mock_logger,
         }

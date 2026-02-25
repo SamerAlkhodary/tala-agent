@@ -1,7 +1,7 @@
 apiVersion: qlik.com/v1
 kind: FullPath
 metadata:
-  name: {{template-agent}}
+  name: tala-agent
 fieldSpecs:
   - kind: HelmChart
     path: chartHome

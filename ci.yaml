@@ -1,16 +1,16 @@
 packageMetadata:
-  - repository: qlik-trial/{{template-agent}}
+  - repository: qlik-trial/tala-agent
     type: docker
-    name: {{template-agent}}
+    name: tala-agent
     apiComplianceConfig:
       specPaths:
         - {spec_path} ## TODO: Replace {spec_path} with actual path
     depConfig:
       pythonDepSpecs:
         - requirements.txt
-  - repository: qlik-trial/{{template-agent}}
+  - repository: qlik-trial/tala-agent
     type: helm
-    name: helm/{{template-agent}}
+    name: helm/tala-agent
     depConfig:
       helmDepSpecs:
-        - manifests/chart/{{template-agent}}
+        - manifests/chart/tala-agent

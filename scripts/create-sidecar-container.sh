@@ -17,7 +17,7 @@ docker create \
 	-e SOLACE_MESSAGE_VPN=QcsPrimary \
 	-e SOLACE_SKIP_CERT_VALIDATION=true \
 	-e SOLACE_URI="tcps://$SOLACE_IP:55443" \
-	-v "$KEYS_LOCATION"/:/var/run/secrets/qlik.com/{{template-agent}}-keys \
+	-v "$KEYS_LOCATION"/:/var/run/secrets/qlik.com/tala-agent-keys \
 	-p 50051:50051 \
 	-p 50151:50151 \
 	-p 50152:50152 \

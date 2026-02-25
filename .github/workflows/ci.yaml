@@ -103,15 +103,15 @@ jobs:
       - name: Push Docker Image to GHCR
         run: |
           echo ${{ secrets.GH_ACCESS_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-          docker image push ghcr.io/qlik-trial/{{template-agent}}:${VERSION}
+          docker image push ghcr.io/qlik-trial/tala-agent:${VERSION}
       - id: sign
         name: Sign Docker Image
         run: |
-          echo "Signing ghcr.io/qlik-trial/{{template-agent}}:${VERSION}"
-          digest=$(docker manifest inspect ghcr.io/qlik-trial/{{template-agent}}:${VERSION} --verbose | jq -r '.Descriptor.digest')
+          echo "Signing ghcr.io/qlik-trial/tala-agent:${VERSION}"
+          digest=$(docker manifest inspect ghcr.io/qlik-trial/tala-agent:${VERSION} --verbose | jq -r '.Descriptor.digest')
           echo "Digest: $digest"
 
-          image="ghcr.io/qlik-trial/{{template-agent}}@${digest}"
+          image="ghcr.io/qlik-trial/tala-agent@${digest}"
           echo "Image to sign: $image"
 
           COSIGN_PASSWORD="${{ secrets.COSIGN_PASSWORD }}" \
@@ -123,9 +123,9 @@ jobs:
     uses: qlik-trial/ci/.github/workflows/package-helm-chart.yaml@release/v0
     secrets: inherit
     with:
-      name: {{template-agent}}
+      name: tala-agent
       version: '${{ needs.calculate_version.outputs.version }}'
-      path: manifests/chart/{{template-agent}}
+      path: manifests/chart/tala-agent
       update_dependencies: 'true'
 
   determine_package_metadata:
@@ -142,10 +142,10 @@ jobs:
         with:
           ci-config-file-path: ci.yaml
           additional-package-metadata: |
-            - name: {{template-agent}}
+            - name: tala-agent
               digest: ${{needs.build_image.outputs.image_digest}}
               version: ${{needs.calculate_version.outputs.version}}
-            - name: helm/{{template-agent}}
+            - name: helm/tala-agent
               digest: ${{needs.build_chart.outputs.chart_digest}}
               version: ${{needs.calculate_version.outputs.version}}
   #call_api_compliance:
@@ -197,8 +197,8 @@ jobs:
     needs: [calculate_version, build_image, build_chart, call_sign_packages]
     uses: qlik-trial/gitops-environments/.github/workflows/argo-update-component-version.yaml@main
     with:
-      chart_name: {{template-agent}}
-      component_id: {{template-agent}}
+      chart_name: tala-agent
+      component_id: tala-agent
       version: ${{ needs.calculate_version.outputs.version }}
       environment: qlik-cloud-services-int-env
     secrets: inherit
@@ -215,7 +215,7 @@ jobs:
       repository: "${{ github.repository }}"
       slack_channel: toolkits-and-deployments-public
       promote: false
-      chart_name: {{template-agent}}
+      chart_name: tala-agent
     secrets: inherit
   on_release_failure:
     runs-on: ubuntu-latest
@@ -237,7 +237,7 @@ jobs:
           payload: >
             channel: toolkits-and-deployments-public
 
-            text: "release of {{template-agent}}:${{
+            text: "release of tala-agent:${{
             needs.calculate_version.outputs.version }} failed :x:"
   export_otel_traces:
     if: "${{ always() }}"

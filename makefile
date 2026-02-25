@@ -1,5 +1,5 @@
 VERSION ?= latest
-SERVICE_NAME = {{template-agent}}
+SERVICE_NAME = tala-agent
 DOCKER_IMAGE := ghcr.io/qlik-trial/$(SERVICE_NAME)
 DOCKER_FILE ?= Dockerfile
 BUILD_TARGET ?= prod
@@ -38,15 +38,15 @@ qlty-downlaod-windows:
 	powershell -c "iwr https://qlty.sh | iex"
 
 lint:
-	uv run ruff check {{template_agent}}/ --config .ruff.toml
+	uv run ruff check tala_agent/ --config .ruff.toml
 
 lint-fix:
-	uv run ruff check {{template_agent}}/ --fix --config .ruff.toml
+	uv run ruff check tala_agent/ --fix --config .ruff.toml
 test-unit:
-	uv run -m pytest --cov={{template_agent}} -vv tests/unit --cov-report=lcov:coverage/unit.info
+	uv run -m pytest --cov=tala_agent -vv tests/unit --cov-report=lcov:coverage/unit.info
 
 test-component:
-	uv run -m pytest --cov={{template_agent}} -vv tests/component --cov-report=lcov:coverage/component.info
+	uv run -m pytest --cov=tala_agent -vv tests/component --cov-report=lcov:coverage/component.info
 
 registry-image:
 	@make build-docker

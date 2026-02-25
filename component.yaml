@@ -1,16 +1,16 @@
-componentId: {{template-agent}}
-discussionSlackChannel: {{discussion-slack-channel}}
-botSlackChannel: {{bot-slack-channel}}
-alertSlackChannel: {{alert-slack-channel}}
-owningTeam: {{team-name}}
-primaryChampion: {{primary-champion}}
+componentId: tala-agent
+discussionSlackChannel: "#ask-analytics-ai-india"
+botSlackChannel: "#analytics-ai-india-alerts"
+alertSlackChannel: "#analytics-ai-india-alerts"
+owningTeam: analytics-ai-india
+primaryChampion: kirthiprakash
 secondaryChampions:
   - ''
 ciChampions:
   - ''
 domain: ai
 grafanaDashboardUrl: ""
-playbookUrl: https://github.com/qlik-trial/{{template-agent}}/blob/main/doc/Playbook.md
+playbookUrl: https://github.com/qlik-trial/tala-agent/blob/main/doc/Playbook.md
 productsAndDeployments:
   - sde
-briefDescription: {{template-agent}}
+briefDescription: tala-agent

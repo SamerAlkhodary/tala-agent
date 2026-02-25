@@ -1919,7 +1919,7 @@ wheels = [
 ]
 
 [[package]]
-name = "{{template-agent}}"
+name = "tala-agent"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [

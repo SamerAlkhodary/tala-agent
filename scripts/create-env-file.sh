@@ -18,7 +18,7 @@ echo "# deleted and recreated from scratch when the script is run. Any manual ch
 echo "# be lost." >>.env
 echo "# ------------------------------------------------------------------------" >>.env
 
-echo "RELEASE_NAME={{template-agent}}" >>.env
+echo "RELEASE_NAME=tala-agent" >>.env
 
 # The services accessed by the service kit sidecar on Docker container doesn't resolve cluster DNS names.
 # So we need to use the cluster IPs instead.
@@ -52,10 +52,10 @@ echo "GRPC_SIDECAR_OVERRIDE=false" >>.env
 echo "\n#secrets" >>.env
 echo "SECRET_KEY_FILE=$KEYS_LOCATION/service-key.yaml" >>.env
 echo "SIDECAR_SHARED_SECRET_LOCATION=$KEYS_LOCATION/sidecarSecret.yaml" >>.env
-echo "JWKS_PATH=/var/run/secrets/qlik.com/{{template-agent}}-keys/service-key.yaml" >>.env
+echo "JWKS_PATH=/var/run/secrets/qlik.com/tala-agent-keys/service-key.yaml" >>.env
 
 # Get the pod name associated with the service
-service={{template-agent}}
+service=tala-agent
 namespace=analytics-ai
 podname=$(kubectl get pods -n $namespace -l app=$service | awk 'NR==2{print $1}')
 echo "$podname"

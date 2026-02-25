@@ -1,4 +1,4 @@
-from {{template_agent}}.config.env_loader import (
+from tala_agent.config.env_loader import (
     _get_env_variable,
 )
 
@@ -7,7 +7,7 @@ class _AgentConfig:
     SERVICE_NAME = _get_env_variable(
         env_name="AGENT_SERVICE_NAME",
         var_type=str,
-        default="{{template-agent}}",
+        default="tala-agent",
         required=False,
     )
     SWARM_FILE_PATH = _get_env_variable(

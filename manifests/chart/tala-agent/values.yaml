@@ -1,4 +1,4 @@
-## Default values for {{template-agent}} Helm Chart.
+## Default values for tala-agent Helm Chart.
 
 image:
   ## Default registry where the repository is pulled from.
@@ -6,7 +6,7 @@ image:
   registry: ghcr.io/qlik-trial
   ## image
   ##
-  repository: {{template-agent}}
+  repository: tala-agent
   ## image version.
   ##
   tag: 0.0.0

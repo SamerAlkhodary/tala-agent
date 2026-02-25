@@ -8,7 +8,7 @@
       "name": "Analytics agent",
       "type": "debugpy",
       "request": "launch",
-      "module": "{{template_agent}}",
+      "module": "tala_agent",
       "justMyCode": false,
       "preLaunchTask": "restart-docker-container",
       "envFile": "${workspaceFolder}/.env"
