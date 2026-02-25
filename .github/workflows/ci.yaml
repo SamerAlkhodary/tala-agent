@@ -36,7 +36,7 @@ jobs:
       release-tag: ${{ steps.get-version.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Get version
@@ -68,7 +68,7 @@ jobs:
       image_digest: '${{ steps.sign.outputs.digest }}'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -135,7 +135,7 @@ jobs:
       package_metadata: ${{ steps.determine_package_metadata.outputs.package-metadata }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Determine Package Metadata
         uses: qlik-trial/ci/.github/actions/determine-package-metadata@release/v0
         id: determine_package_metadata
