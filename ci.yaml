@@ -1,0 +1,16 @@
+packageMetadata:
+  - repository: qlik-trial/{{template-agent}}
+    type: docker
+    name: {{template-agent}}
+    apiComplianceConfig:
+      specPaths:
+        - {spec_path} ## TODO: Replace {spec_path} with actual path
+    depConfig:
+      pythonDepSpecs:
+        - requirements.txt
+  - repository: qlik-trial/{{template-agent}}
+    type: helm
+    name: helm/{{template-agent}}
+    depConfig:
+      helmDepSpecs:
+        - manifests/chart/{{template-agent}}

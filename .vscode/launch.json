@@ -1,0 +1,59 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Analytics agent",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "{{template_agent}}",
+      "justMyCode": false,
+      "preLaunchTask": "restart-docker-container",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Interactive - Console mode",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "interactive",
+      "justMyCode": false,
+      "preLaunchTask": "Pre Flight Checks and Restart Docker Container",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "USER_ID": "${input:user_id}",
+        "TENANT_ID": "${input:tenant_id}",
+        "APP_ID": "${input:app_id}"
+      }
+    },
+    {
+      "name": "Debug Current Test File",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "console": "integratedTerminal",
+      "args": [
+        "${relativeFileDirname}/${fileBasenameNoExtension}.py",
+      ],
+      "justMyCode": false,
+    }
+  ],
+  "inputs": [
+    {
+      "id": "user_id",
+      "type": "promptString",
+      "description": "Provide USER ID from https://<tenant_url>/api/v1/users/me"
+    },
+    {
+      "id": "tenant_id",
+      "type": "promptString",
+      "description": "Provide the tenant ID from https://<tenant_url>/api/v1/users/me",
+    },
+    {
+      "id": "app_id",
+      "type": "promptString",
+      "description": "Provide the app ID",
+    }
+  ]
+}

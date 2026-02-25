@@ -1,0 +1,282 @@
+openapi: 3.0.0
+x-qlik-visibility: "private"
+x-qlik-stability: "experimental"
+info:
+  title: Agent
+  version: 3.0.0
+  description: The agent service is responsible for requests related to user interactions within the app.
+  x-qlik-guidelines-version: 6.0.1
+tags:
+  - name: remote/stream
+    description: The remote/stream API is used to provide real-time streaming responses for a specific thread
+security:
+  - bearerAuth: []
+paths:
+  /ai/threads/{thread_id}/remote/stream:
+    post:
+      x-qlik-visibility: "private"
+      summary: Stream
+      operationId: v1ThreadIdRemoteStream
+      tags:
+        - remote/stream
+      parameters:
+        - description: The thread id
+          name: thread_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InputMessage"
+      responses:
+        "201":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Bad request. The payload is not formed correctly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: The JWT used for authentication. Send the JWT in the Authorization header using the Bearer schema.
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CardContent:
+      properties:
+        card:
+          type: object
+          title: Card
+          description: UI element using the adaptive card standard
+        modal:
+          type: boolean
+          nullable: true
+          title: Modal
+          description: If true the response should show in a modal dialog
+          default: false
+      type: object
+      required:
+        - card
+      title: Card-Content
+    Content-Input:
+      type: object
+      description: Wrapper object that allows multiple content types. One of the listed types must match.
+      properties:
+        content:
+          type: object
+          description: One of text or card
+          oneOf:
+            - $ref: "#/components/schemas/TextContent"
+            - $ref: "#/components/schemas/CardContent"
+          example:
+            type: text
+            text: "This is an example text content."
+    Content-Output:
+      type: object
+      description: Wrapper for various content outputs. One of the defined output types.
+      properties:
+        content:
+          description: One of text or card.
+          anyOf:
+            - $ref: "#/components/schemas/TextContent"
+            - $ref: "#/components/schemas/CardContent"
+    Context:
+      properties:
+        type:
+          $ref: "#/components/schemas/ContextType"
+        id:
+          type: string
+          nullable: true
+          title: Id
+          description: >-
+            Id specific to the context. For example, application id
+            etc
+        data:
+          type: object
+          nullable: true
+          title: Data
+          description: Any additional data needed for the context
+          example: {"key": "value"}
+      type: object
+      required:
+        - type
+      title: Context
+    ContextType:
+      type: string
+      enum:
+        - app
+      title: Context-Type
+    DataContent:
+      type: object
+      title: Data-Content
+      properties:
+        data:
+          type: object
+          nullable: true
+          title: Data
+          description: Response to an input validation.
+      example: {"status": "valid"}
+    Errors:
+      x-qlik-visibility: "private"
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Error"
+            description: A list of errors.
+    Error:
+      x-qlik-visibility: "private"
+      type: object
+      description: An error object.
+      required:
+        - code
+        - title
+      properties:
+        code:
+          type: string
+          description: The error code.
+        title:
+          type: string
+          description: Summary of the problem.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+        meta:
+          type: object
+          description: Additional properties relating to the error.
+        source:
+          type: object
+          description: References to the source of the error.
+          properties:
+            parameter:
+              type: string
+              description: The URI query parameter that caused the error.
+            pointer:
+              type: string
+              description: A JSON Pointer to the property that caused the error.
+    HTTPValidationError:
+      x-qlik-visibility: "private"
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
+      title: HTTP-Validation-Error
+    InputMessage:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: array
+          description: >-
+            The content of the message. The content can be a list of different
+            types of content. For example, text, image, chart, etc.
+          items:
+            $ref: "#/components/schemas/Content-Input"
+          example:
+            - type: text
+              text: "change the charts colors to red"
+      title: Input-Message
+    Message:
+      properties:
+        id:
+          type: string
+          nullable: true
+          title: Id
+        type:
+          type: string
+          title: Type
+        content:
+          items:
+            $ref: "#/components/schemas/Content-Output"
+          description: >-
+            The content of the message. The content can be a list of different
+            types of content. For example, text or card.
+          type: array
+          title: Content
+        context:
+          $ref: "#/components/schemas/Context"
+          nullable: true
+      type: object
+      required:
+        - type
+        - content
+      title: Message
+    TextContent:
+      properties:
+        sources:
+          type: array
+          items:
+            type: string
+          nullable: true
+          title: Sources
+          description: Any sources referenced in text or charts
+        text:
+          type: string
+          title: Text
+          description: Text response in markdown format
+      type: object
+      required:
+        - text
+      title: Text-Content
+    ValidationError:
+      x-qlik-visibility: "private"
+      description: An error object.
+      properties:
+        code:
+          type: string
+          description: The error code.
+        title:
+          type: string
+          description: Summary of the problem.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+        meta:
+          type: object
+          description: Additional properties relating to the error.
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: Validation-Error

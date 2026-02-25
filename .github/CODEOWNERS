@@ -1,0 +1,6 @@
+# These owners will be the default owners for everything in the repo.
+* @qlik-trial/analytics-ai-india @qlik-trial/{{team-name}} @qlik-trial/analytics-ai-team
+
+# allows automerge
+/uv.lock      @svc-pipeline @qlik-trial/{{team-name}} @qlik-trial/analytics-ai-team
+/pyproject.toml  @svc-pipeline @qlik-trial/{{team-name}} @qlik-trial/analytics-ai-team

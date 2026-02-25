@@ -1,0 +1,7 @@
+apiVersion: qlik.com/v1
+kind: FullPath
+metadata:
+  name: {{template-agent}}
+fieldSpecs:
+  - kind: HelmChart
+    path: chartHome

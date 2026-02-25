@@ -1,0 +1,4 @@
+helmDepSpecs:
+    - manifests/chart/{{template-agent}}
+pythonDepSpecs:
+    - requirements.txt

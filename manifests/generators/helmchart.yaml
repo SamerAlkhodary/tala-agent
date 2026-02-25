@@ -1,0 +1,12 @@
+apiVersion: qlik.com/v1
+kind: HelmChart
+metadata:
+  name: {{template-agent}}
+chartHome: ../chart
+chartName: {{template-agent}}
+releaseName: {{template-agent}}
+releaseNamespace: $(NAMESPACE)
+newChartVersion: $(VERSION)
+values:
+  image:
+    tag: $(VERSION)

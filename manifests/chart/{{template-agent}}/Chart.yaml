@@ -1,0 +1,16 @@
+apiVersion: v2
+description: >
+  Helm chart for {{template-agent}}
+  capabilities for the Qlik.
+name: {{template-agent}}
+version: 0.1.1
+keywords:
+  - {{template-agent}}
+home: https://www.qlik.com
+sources:
+  - https://github.com/qlik-trial/{{template-agent}}
+dependencies:
+  - name: qlikcommon
+    version: 3.26.2
+    repository: oci://ghcr.io/qlik-trial/helm
+    condition: global.component-common-imports

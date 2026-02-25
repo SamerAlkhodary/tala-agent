@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "restart-docker-container",
+      "type": "shell",
+      "command": "docker restart analytics-psk-sidecar",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "check-k8s-cluster-info",
+      "type": "shell",
+      "command": "kubectl cluster-info --request-timeout=3s || (echo 'Error: Kubernetes cluster is not reachable.' && exit 1)",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "check-telepresence-status",
+      "type": "shell",
+      "command": "telepresence status | grep -q 'Connected' || (echo 'Telepresence is not connected.' && exit 1)",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "check-docker-container-exists",
+      "type": "shell",
+      "command": "docker ps -a --format '{{.Names}}' | grep -q '^analytics-psk-sidecar$' || (echo 'Container analytics-psk-sidecar does not exist.' && exit 1)",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Pre Flight Checks and Restart Docker Container",
+      "dependsOn": [
+        "check-docker-container-exists",
+        "check-k8s-cluster-info",
+        "check-telepresence-status",
+        "restart-docker-container"
+      ],
+      "dependsOrder": "sequence",
+      "group": "build"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+apiVersion: qlik.com/v1
+kind: SearchReplace
+metadata:
+  name: {{template-agent}}
+target:
+  kind: HelmChart
+path: /
+search: \$\(VERSION\)
+replaceWithGitDescribeTag:
+  default: 0.0.0

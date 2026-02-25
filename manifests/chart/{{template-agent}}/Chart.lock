@@ -1,0 +1,6 @@
+dependencies:
+- name: qlikcommon
+  repository: oci://ghcr.io/qlik-trial/helm
+  version: 3.26.2
+digest: sha256:b5b57c44e6ed700d88f7ad748f866699a80cbdc56627107bea21309caa9256bc
+generated: "2025-07-24T13:50:21.230193263Z"

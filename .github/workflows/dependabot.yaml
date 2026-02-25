@@ -1,0 +1,44 @@
+name: Dependabot CI
+run-name: auto-merge dependabot PRs
+permissions:
+  contents: write
+  packages: write
+  actions: write
+  deployments: write
+  statuses: write
+  id-token: write
+  attestations: write
+  checks: write
+  discussions: write
+  issues: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+on:
+  pull_request:
+    branches:
+      - main
+env:
+  GITHUB_API_TOKEN: '${{ secrets.GH_ACCESS_TOKEN }}'
+jobs:
+  auto-merge-dependabot:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2.4.0
+        with:
+          github-token: ${{ secrets.GH_ACCESS_TOKEN }}
+      - name: Approve a PR
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}
+      - name: Enable auto-merge for Dependabot PRs allow merge of patch and minor automatically.
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GH_ACCESS_TOKEN}}

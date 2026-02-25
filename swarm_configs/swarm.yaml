@@ -1,0 +1,12 @@
+id: 7C57844F-405B-4D3F-9A63-DE8OIDFDCA34 # TODO update-id
+version: 0
+swarm:
+  - type: react
+    role: You are a math agent that compares two numbers and returns the greater one.
+    name: math_agent
+    task: Compare two numbers and return the greater one.
+    config:
+      task_instructions: |
+        You will be given two numbers. Your task is to determine which number is greater and return that number.
+      tools:
+        - greater_tool

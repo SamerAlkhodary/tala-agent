@@ -1,0 +1,76 @@
+{{- template "common.configmap" (list . "{{template-agent}}.configmap") -}}
+{{- define "{{template-agent}}.configmap" -}}
+{{- end }}
+
+---
+{{ template "common.secret" (list . "{{template-agent}}.secret") -}}
+{{- define "{{template-agent}}.secret" -}}
+{{- end }}
+---
+
+{{ template "common.serviceaccount" (list . "{{template-agent}}.serviceaccount" ) -}}
+{{- define "{{template-agent}}.serviceaccount" -}}
+{{- end }}
+
+---
+{{ template "common.networkpolicy" (list . "{{template-agent}}.networkpolicy") -}}
+{{- define "{{template-agent}}.networkpolicy" -}}
+{{- end }}
+
+---
+{{ template "common.sealedsecret" (list . "{{template-agent}}.sealedsecret") -}}
+{{- define "{{template-agent}}.sealedsecret" -}}
+{{- end }}
+
+---
+
+{{ template "common.service" (list . "{{template-agent}}.service") -}}
+{{- define "{{template-agent}}.service" -}}
+{{- end }}
+
+---
+{{ template "common.deployment" (list . "{{template-agent}}.deployment") -}}
+{{- define "{{template-agent}}.deployment" -}}
+metadata:
+  name: {{ template "common.fullname" . }}
+  labels:
+    qlik.encryption: "true"
+  annotations:
+    qlik.encryption.service: '{ "serviceS2SName": "{{template-agent}}", "serviceDisplayName": "{{template-agent}}", "serviceEncryptionContext": "{{template-agent}}" }'
+spec:
+  template:
+    spec:
+      containers:
+        -
+{{ include "common.container" (list (set . "container" .Values.deployment.container) "{{template-agent}}.deployment.container") | indent 8 }}
+{{- end }}
+
+
+{{- define "{{template-agent}}.deployment.container" -}}
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: http
+ports:
+  - name: http
+    containerPort: {{ .Values.service.port }}
+    protocol: TCP
+{{- end }}
+---
+{{ template "common.keyrequest" (list . "{{template-agent}}.keyrequest") -}}
+{{- define "{{template-agent}}.keyrequest" -}}
+{{- end }}
+
+---
+{{ template "common.keyssecret" (list . "{{template-agent}}.keyssecret") -}}
+{{- define "{{template-agent}}.keyssecret" -}}
+{{- end }}
+
+---
+{{ template "common.hpa" (list . "{{template-agent}}.hpa") -}}
+{{- define "{{template-agent}}.hpa" -}}
+{{- end }}

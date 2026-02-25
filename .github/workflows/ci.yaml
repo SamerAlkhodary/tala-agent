@@ -1,0 +1,247 @@
+name: ci-build
+run-name: Build/test/publish
+permissions:
+  contents: write
+  packages: write
+  actions: write
+  deployments: write
+  statuses: write
+  id-token: write
+  attestations: write
+  checks: write
+  discussions: write
+  issues: write
+  models: read
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+env:
+  GITHUB_API_TOKEN: '${{ secrets.GH_ACCESS_TOKEN }}'
+  QLIK_DOCKER_DEV_REGISTRY: ${{ secrets.QLIK_DOCKER_DEV_REGISTRY }}
+jobs:
+  calculate_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      release-tag: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get version
+        id: get-version
+        run: |
+          echo "GITHUB_REF=${GITHUB_REF}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+          # Tag push: extract version from tag (strip leading 'v')
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+          # Not a tag push: get latest tag and append short SHA for a dev version built from a branch
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          VERSION="${LATEST_TAG#v}-dev${SHORT_SHA}"
+          fi
+          echo "version=${VERSION}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  validate_component_metadata:
+    uses: qlik-trial/ci/.github/workflows/validate-component-metadata.yaml@release/v0
+    secrets: inherit
+  build_image:
+    runs-on: ubuntu-latest
+    needs: calculate_version
+    env:
+      VERSION: ${{ needs.calculate_version.outputs.version }}
+      SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    outputs:
+      image_digest: '${{ steps.sign.outputs.digest }}'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.7"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+          python-version: '3.13'
+      - uses: sigstore/cosign-installer@main
+      - name: Git Config
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.GH_SSH_KEY }}"
+
+      - name: configure ssh
+        run: git config --global url.ssh://git@github.com/.insteadOf https://github.com/
+      - name: Install the project
+        run: uv sync --all-extras --dev
+      - name: Run unit tests
+        run: |
+          make test-unit
+      - name: Run component tests
+        run: |
+          make test-component
+
+      - name: Lint
+        run: make lint
+      - name: Build Docker Image
+        run: |
+          make build-docker
+      - name: Push Docker Image to GHCR
+        run: |
+          echo ${{ secrets.GH_ACCESS_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+          docker image push ghcr.io/qlik-trial/{{template-agent}}:${VERSION}
+      - id: sign
+        name: Sign Docker Image
+        run: |
+          echo "Signing ghcr.io/qlik-trial/{{template-agent}}:${VERSION}"
+          digest=$(docker manifest inspect ghcr.io/qlik-trial/{{template-agent}}:${VERSION} --verbose | jq -r '.Descriptor.digest')
+          echo "Digest: $digest"
+
+          image="ghcr.io/qlik-trial/{{template-agent}}@${digest}"
+          echo "Image to sign: $image"
+
+          COSIGN_PASSWORD="${{ secrets.COSIGN_PASSWORD }}" \
+          cosign sign --key <(echo -n "${{ secrets.COSIGN_PRIVATE_KEY_ENCODED }}" | base64 -d) "$image"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+  build_chart:
+    needs:
+      - calculate_version
+    uses: qlik-trial/ci/.github/workflows/package-helm-chart.yaml@release/v0
+    secrets: inherit
+    with:
+      name: {{template-agent}}
+      version: '${{ needs.calculate_version.outputs.version }}'
+      path: manifests/chart/{{template-agent}}
+      update_dependencies: 'true'
+
+  determine_package_metadata:
+    runs-on: ubuntu-latest
+    needs: [calculate_version, build_image, build_chart]
+    outputs:
+      package_metadata: ${{ steps.determine_package_metadata.outputs.package-metadata }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Determine Package Metadata
+        uses: qlik-trial/ci/.github/actions/determine-package-metadata@release/v0
+        id: determine_package_metadata
+        with:
+          ci-config-file-path: ci.yaml
+          additional-package-metadata: |
+            - name: {{template-agent}}
+              digest: ${{needs.build_image.outputs.image_digest}}
+              version: ${{needs.calculate_version.outputs.version}}
+            - name: helm/{{template-agent}}
+              digest: ${{needs.build_chart.outputs.chart_digest}}
+              version: ${{needs.calculate_version.outputs.version}}
+  #call_api_compliance:
+  #  needs: [determine_package_metadata]
+  #  uses: qlik-trial/ci/.github/workflows/pac-api-compliance.yaml@release/v0
+  #  secrets: inherit
+  #  with:
+  #    package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+
+  call_pac_twistlock:
+    needs: [determine_package_metadata]
+    uses: qlik-trial/ci/.github/workflows/pac-twistlock.yaml@release/v0
+    secrets: inherit
+    with:
+      package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+  call_pac_soc2:
+    needs: [determine_package_metadata, call_pac_twistlock]
+    uses: qlik-trial/ci/.github/workflows/pac-soc2.yaml@release/v0
+    secrets: inherit
+    with:
+      package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+  call_pac_security:
+    needs: [determine_package_metadata, call_pac_soc2]
+    uses: qlik-trial/ci/.github/workflows/pac-security.yaml@release/v0
+    secrets: inherit
+    with:
+      package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+
+  call_pac_dependencies:
+    needs: [determine_package_metadata, call_pac_security]
+    uses: qlik-trial/ci/.github/workflows/pac-dependencies.yaml@release/v0
+    secrets: inherit
+    with:
+      package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+  call_sign_packages:
+    needs:
+      - determine_package_metadata
+      - call_pac_soc2
+      - call_pac_security
+      - call_pac_twistlock
+      - call_pac_dependencies
+      #- call_api_compliance
+    uses: qlik-trial/ci/.github/workflows/sign-packages.yaml@release/v0
+    with:
+      package_metadata: "${{needs.determine_package_metadata.outputs.package_metadata}}"
+    secrets: inherit
+  promote_to_int:
+    if: github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]'
+    needs: [calculate_version, build_image, build_chart, call_sign_packages]
+    uses: qlik-trial/gitops-environments/.github/workflows/argo-update-component-version.yaml@main
+    with:
+      chart_name: {{template-agent}}
+      component_id: {{template-agent}}
+      version: ${{ needs.calculate_version.outputs.version }}
+      environment: qlik-cloud-services-int-env
+    secrets: inherit
+  create_release:
+    needs:
+      - calculate_version
+      - determine_package_metadata
+      - call_sign_packages
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: qlik-trial/ci/.github/workflows/create-release.yaml@release/v0
+    with:
+      version: "${{ needs.calculate_version.outputs.version }}"
+      release_tag: "${{ needs.calculate_version.outputs.release_tag }}"
+      repository: "${{ github.repository }}"
+      slack_channel: toolkits-and-deployments-public
+      promote: false
+      chart_name: {{template-agent}}
+    secrets: inherit
+  on_release_failure:
+    runs-on: ubuntu-latest
+    needs:
+      - calculate_version
+      - create_release
+    if: failure() && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Cleanup Release
+        uses: qlik-trial/ci/.github/actions/cleanup-release@release/v0
+        with:
+          tag: "${{ needs.calculate_version.outputs.release_tag }}"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: "${{ secrets.SLACK_ACCESS_TOKEN }}"
+          payload: >
+            channel: toolkits-and-deployments-public
+
+            text: "release of {{template-agent}}:${{
+            needs.calculate_version.outputs.version }} failed :x:"
+  export_otel_traces:
+    if: "${{ always() }}"
+    uses: qlik-trial/ci/.github/workflows/export-otel-traces.yaml@release/v0
+    with:
+      workflow_run_id: "${{ github.run_id }}"
+    secrets: inherit

@@ -1,0 +1,3 @@
+organisation:
+  team-name: {{team-name}}
+  disable-team-on-create: false

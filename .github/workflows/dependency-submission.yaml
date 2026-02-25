@@ -1,0 +1,28 @@
+name: dependency-submission
+run-name: Submit uv dependencies
+
+permissions:
+  contents: write
+  security-events: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  submit_dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Submit uv dependencies
+        uses: qlik-trial/ci/.github/actions/submit-uv-dependencies@dependencies-github-poc
+        with:
+          lock_file_path: uv.lock
+          toml_file_path: pyproject.toml
+          token: ${{ secrets.GITHUB_TOKEN }}

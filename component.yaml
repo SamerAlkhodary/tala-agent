@@ -1,0 +1,16 @@
+componentId: {{template-agent}}
+discussionSlackChannel: {{discussion-slack-channel}}
+botSlackChannel: {{bot-slack-channel}}
+alertSlackChannel: {{alert-slack-channel}}
+owningTeam: {{team-name}}
+primaryChampion: {{primary-champion}}
+secondaryChampions:
+  - ''
+ciChampions:
+  - ''
+domain: ai
+grafanaDashboardUrl: ""
+playbookUrl: https://github.com/qlik-trial/{{template-agent}}/blob/main/doc/Playbook.md
+productsAndDeployments:
+  - sde
+briefDescription: {{template-agent}}

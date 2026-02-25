@@ -1,0 +1,53 @@
+## Default values for {{template-agent}} Helm Chart.
+
+image:
+  ## Default registry where the repository is pulled from.
+  ## `global.imageRegistry` if set override this value.
+  registry: ghcr.io/qlik-trial
+  ## image
+  ##
+  repository: {{template-agent}}
+  ## image version.
+  ##
+  tag: 0.0.0
+  ## Specify a imagePullPolicy: 'Always' if imageTag is 'latest', else set to 'IfNotPresent'.
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Secrets for pulling images from a private docker registry.
+  ##
+  pullSecrets:
+    - name: artifactory-docker-secret
+
+## service configuration
+configs:
+  data:
+    logLevel: "debug"
+    llmGatewayApiUri: ""
+
+## Service configuration.
+## ref: https://kubernetes.io/docs/user-guide/services/
+##
+service:
+  type: ClusterIP
+  port: 8000
+
+  ## Metrics configuration
+  ## Prometheus configuration
+  ## The annotations for prometheus scraping are included
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.service.port }}"
+
+deployment:
+  replicas: 1
+  container:
+    resources:
+      requests:
+        cpu: "60m"
+hpa:
+  enabled: false
+
+## fallback to Jaeger.
+tracing:
+  enabled: true

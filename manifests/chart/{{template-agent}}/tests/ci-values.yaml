@@ -1,0 +1,4 @@
+configs:
+  data:
+    grpcSidecarOverride: true
+    enableFeatures: false
